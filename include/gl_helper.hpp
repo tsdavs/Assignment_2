@@ -33,7 +33,7 @@ static void GLLog()
 {
     GLenum error;
     
-    while(error = glGetError())
+    while((error = glGetError()) != GL_NO_ERROR)
     {
         printf("GL_ERROR: %s\n", gluErrorString(error));
     }
