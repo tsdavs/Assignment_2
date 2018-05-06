@@ -1,11 +1,11 @@
 /**
  *	Implementation of engine.h
  */
-#include "euclidean2/system/engine.h"
-#include "euclidean2/system/window.h"
+#include "euclidean2/system/engine.hpp"
+#include "euclidean2/system/window.hpp"
 
-#include "platform.h"
-#include "gl_helper.h"
+#include "platform.hpp"
+#include "gl_helper.hpp"
 
 #include <stdio.h>
 #include <string.h>

@@ -1,19 +1,19 @@
 /**
  *  Implementation of window.h
  */
-#include "euclidean2/system/window.h"
+#include "euclidean2/system/window.hpp"
 
-#include "platform.h"
+#include "platform.hpp"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 static window_t* hwnd = NULL;
 
 window_t* r_createWindow(int width, int height, const char* title)
 {
-    hwnd = malloc(sizeof(window_t));
+    hwnd = static_cast<window_t*>(malloc(sizeof(window_t)));
 
     if(!hwnd)
     {
@@ -21,7 +21,7 @@ window_t* r_createWindow(int width, int height, const char* title)
         return NULL;
     }
 
-    hwnd->title = malloc(strlen(title));
+    hwnd->title = static_cast<char*>(malloc(strlen(title)));
     
     hwnd->height = height;
     hwnd->width = width;

@@ -4,9 +4,9 @@
 #ifndef _GL_HELPER_H_INCLUDED
 #define _GL_HELPER_H_INCLUDED
 
-#include "platform.h"
+#include "platform.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 
 /**
  *  Wrapper to call _and_ log any OpenGL function passed to it. 

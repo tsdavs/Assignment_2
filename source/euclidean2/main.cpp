@@ -1,12 +1,12 @@
 /**
  *	Euclidean2 engine entry point
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdlib>
 
-#include "euclidean2/system/engine.h"
-#include "platform.h"
+#include "euclidean2/system/engine.hpp"
+#include "platform.hpp"
 
 int main(int argc, char** argv)
 {

@@ -1,13 +1,13 @@
+
 /**
  *	Engine related structures and functions
  */
 #ifndef _ENGINE_H_INCLUDED
 #define _ENGINE_H_INCLUDED
 
-#include "euclidean2/system/window.h"
+#include "euclidean2/system/window.hpp"
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 
 /**
  *	Engine 'class'. Contains function pointers to the update, input and render methods.
