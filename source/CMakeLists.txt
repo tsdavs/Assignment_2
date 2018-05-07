@@ -15,6 +15,10 @@ add_executable("${CMAKE_PROJECT_NAME}"
 
 	"euclidean2/system/engine.cpp"
 	"euclidean2/system/window.cpp"
+
+    "euclidean2/math/vec2.cpp"
+    "euclidean2/math/vec3.cpp"
+    "euclidean2/math/e_math.cpp"
 )
 
 target_link_libraries("${CMAKE_PROJECT_NAME}"
