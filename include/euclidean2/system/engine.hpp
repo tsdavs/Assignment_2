@@ -33,9 +33,10 @@ typedef struct
 /**
  *  Engine initilisation routine. Gets us out of main.
  *
+ *  @param argc Number of arguments passed
  *  @param argv Arguments passed from the command line
  */
-void e_init(char** argv);
+void e_init(int argc, char** argv);
 
 /**
  *  Engine shutdown function
