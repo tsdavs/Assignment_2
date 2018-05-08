@@ -17,6 +17,8 @@
 
 #include <string>
 
+static constexpr float MILLISECOND_TIME = 1000.0f;
+
 engine_t engine;	/**< Local engine structure. Not static so we can abuse 'extern'. */
 camera_t cam;
 
@@ -29,13 +31,44 @@ static void i_keyPressed(unsigned char c, int x, int y)
 
     switch(c)
     {
-        case 127:
+
+        case 'w':
+            cam_translate(cam, 0.6f * engine.dt);
+            break;
+
+        case 's':
+            cam_translate(cam, -0.6f * engine.dt);
+            break;
+
+        case 'p':
+            engine.running = !engine.running;
+            break;
+
+        case 127: // DEL
             engine.debug = !engine.debug;
+            break;
+
+        case 27: // ESC
+            #ifdef FREEGLUT
+                glutLeaveMainLoop();
+            #else
+                exit(0);
+            #endif
             break;
 
         default:
             break;
     }
+}
+
+static void i_mouseMotion(int x, int y)
+{
+    float dx = static_cast<float>(x) - static_cast<float>(hwnd->width / 2);
+    float dy = static_cast<float>(y) - static_cast<float>(hwnd->height / 2);
+
+    cam_yaw(cam, dx * engine.dt);
+    cam_pitch(cam, dy * engine.dt);
+    cam_update(cam);
 }
 
 // Draw 3D axes
@@ -106,21 +139,24 @@ static void e_pumpGLError(void)
  */
 static void draw(void)
 {
-    char str[256];
+    char str[512];
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // View stuff
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(cam.x, cam.y, cam.z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(cam.x, cam.y, cam.z, cam.x + cam.lx, cam.y + cam.ly, cam.z + cam.lz, 0.0f, 1.0f, 0.0f);
 
     if(engine.debug)
     {
         r_drawString(0, 0, "[ DEBUG ]");
+        sprintf(str, "cam.x     = %f\ncam.y     = %f\ncam.z     = %f\ncam.lx    = %f\ncam.ly    = %f\ncam.lz    = %f\ncam.pitch = %f\ncam.yaw   = %f\n", cam.x, cam.y, cam.z, cam.lx, cam.ly, cam.lz, cam.pitch, cam.yaw);
+        r_drawString(0, 13, str);
     }
 
     r_drawAxes();
+    glutWireTeapot(0.4f);
 
     e_pumpGLError();
 	glutSwapBuffers();
@@ -138,7 +174,7 @@ void e_update(void)
     float t = 0.0f;
     float dt = 0.0f;
 
-    t = glutGet(GLUT_ELAPSED_TIME) / MILLISECOND_TIME; // Number of ms since glutInit() was called
+    t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
 
     // Skip the first frame to prevent / 0
     // Also keep the clock running even if the sim is paused to dt doesn't become huge
@@ -148,22 +184,21 @@ void e_update(void)
         return;
     } 
 
+    if(engine.running)
+    {
+        glutSetCursor(GLUT_CURSOR_NONE);
+        glutWarpPointer(hwnd->width/2, hwnd->height/2);
+    }
+
     dt = t - prev_t;
-
-    // TODO: Game logic here!
-
-
-
 
 
 
     prev_t = t;
-    
     dt = t - engine.last_frametime;
-
     if(dt > 0.2)
     {        
-        engine.framerate = (engine.frames/dt);
+        engine.framerate = static_cast<float>(engine.frames)/dt;
         engine.dt = dt;
         engine.last_frametime = t;
         engine.frames = 0;
@@ -200,6 +235,7 @@ void e_init(int argc, char** argv)
 
 	glutIdleFunc(e_update);
     glutKeyboardFunc(i_keyPressed);
+    glutPassiveMotionFunc(i_mouseMotion);
 
     #ifdef FREEGLUT
         glutCloseFunc(e_shutdown);
