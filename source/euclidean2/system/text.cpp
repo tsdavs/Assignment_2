@@ -52,13 +52,6 @@ void r_drawString(int x, int y, const char* msg)
             continue;
         }
 
-        if(*msg == '\t')
-        {
-            x += (x % 4);
-            msg++;
-            continue;
-        }
-
         r_drawChar(x, y, *msg++);
         
         x += 8;
