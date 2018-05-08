@@ -14,7 +14,18 @@
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
-    #include <GL/glut.h>
+    
+    /**
+     *  Check for FreeGLUT (Linux only for now [because that's what we're targetting!])
+     *  This is passed in from the cmake file using the -D flag
+     */
+    #ifdef FREEGLUT_BUILD
+        #include <GL/freeglut.h>
+    #else
+        #warning "No FREEGLUT detected!"
+        #include <GL/glut.h>
+    #endif
+
 #endif
 
 

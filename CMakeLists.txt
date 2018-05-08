@@ -18,6 +18,9 @@ else()
 	message(SEND_ERROR "Could not detect system bitness.")
 endif()
 
+# Remove this line if you don't want to use FreeGLUT
+add_definitions(-DFREEGLUT_BUILD)
+
 include(CheckCXXCompilerFlag)
 
 if(NOT CMAKE_BUILD_TYPE)

@@ -40,7 +40,7 @@ bool r_freeWindow();
  *
  *  @param drawCB Pointer to draw callback function
  */
-void r_setDrawFunction(void (*drawCB)(void));
+bool r_setDrawFunction(void (*drawCB)(void));
 
 /**
  *  Update the dimensions of our window
