@@ -16,6 +16,8 @@ add_executable("${CMAKE_PROJECT_NAME}"
 	"euclidean2/system/engine.cpp"
 	"euclidean2/system/window.cpp"
     "euclidean2/system/text.cpp"
+    "euclidean2/system/light.cpp"
+    "euclidean2/system/material.cpp"
 
     "euclidean2/math/vec2.cpp"
     "euclidean2/math/vec3.cpp"

@@ -7,6 +7,9 @@
 #include "euclidean2/math/angle.hpp"
 #include "euclidean2/system/text.hpp"
 
+#include "euclidean2/system/light.hpp"
+#include "euclidean2/system/material.hpp"
+
 #include "platform.hpp"
 #include "gl_helper.hpp"
 
@@ -63,6 +66,9 @@ static void i_keyPressed(unsigned char c, int x, int y)
 
 static void i_mouseMotion(int x, int y)
 {
+    if(!engine.running)
+        return;
+
     float dx = static_cast<float>(x) - static_cast<float>(hwnd->width / 2);
     float dy = static_cast<float>(y) - static_cast<float>(hwnd->height / 2);
 
@@ -134,6 +140,11 @@ static void e_pumpGLError(void)
     }
 }
 
+
+light_t l1;
+material_t m1;
+
+
 /**
  *	Engine draw function
  */
@@ -143,20 +154,39 @@ static void draw(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+	if(!engine.running)
+		return;
+
     // View stuff
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(cam.x, cam.y, cam.z, cam.x + cam.lx, cam.y + cam.ly, cam.z + cam.lz, 0.0f, 1.0f, 0.0f);
 
+	light_enable(l1);
+
     if(engine.debug)
     {
         r_drawString(0, 0, "[ DEBUG ]");
+		r_drawString(0, 13, "[ CAM ]");
         sprintf(str, "cam.x     = %f\ncam.y     = %f\ncam.z     = %f\ncam.lx    = %f\ncam.ly    = %f\ncam.lz    = %f\ncam.pitch = %f\ncam.yaw   = %f\n", cam.x, cam.y, cam.z, cam.lx, cam.ly, cam.lz, cam.pitch, cam.yaw);
-        r_drawString(0, 13, str);
+        r_drawString(0, 26, str);
+		r_drawString(0, 143, "[ LIGHTING ]");
+		sprintf(str, "activeLights = %d", light_getActiveLightCount());
+		r_drawString(0, 156, str);
     }
 
     r_drawAxes();
-    glutWireTeapot(0.4f);
+
+	glEnable(GL_LIGHTING);
+
+    light_translate(l1, 0.0f, 0.0f, -0.02f);
+    material_bind(m1);
+    glutSolidTeapot(0.4f);
+   
+	light_draw(l1);
+	light_disable(l1);
+	glDisable(GL_LIGHTING);
 
     e_pumpGLError();
 	glutSwapBuffers();
@@ -180,7 +210,8 @@ void e_update(void)
     // Also keep the clock running even if the sim is paused to dt doesn't become huge
     if(prev_t < 0.0f || !engine.running)
     {
-        prev_t = t;
+  		prev_t = t;	
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
         return;
     } 
 
@@ -206,6 +237,19 @@ void e_update(void)
     glutPostRedisplay();
 }
 
+static void e_glInit()
+{
+    glShadeModel(GL_SMOOTH);    // Set the shading model
+    glEnable(GL_DEPTH_TEST);    // Enable the Depth test for depth buffer
+    glDepthFunc(GL_LESS);
+
+    // Enable transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Lighting 
+}
+
 void e_init(int argc, char** argv)
 {
     // Walk the arguments list
@@ -218,6 +262,9 @@ void e_init(int argc, char** argv)
     printf("---- e_init ----\n");
     r_createWindow(640, 480, "Test");
     r_setDrawFunction(&draw);
+
+    // Initialize OpenGL paramaters
+    e_glInit();
     
 	// Engine stuff
     engine.debug            = false;
@@ -231,7 +278,7 @@ void e_init(int argc, char** argv)
 
     cam_init(cam, hwnd->width, hwnd->height);
 
-	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f))
+	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 
 	glutIdleFunc(e_update);
     glutKeyboardFunc(i_keyPressed);
@@ -243,8 +290,8 @@ void e_init(int argc, char** argv)
 
     cam.z = 5.0f;
 
+    light_create(l1, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 5.0f, 1.0f, 0.3f, 0.02f, GL_LIGHT0);
+    material_create(m1, 0.135f, 0.2225f, 0.1575f, 0.54f, 0.89f, 0.63f, 0.316228f, 0.316228f, 0.316228f, 12.8f);
+
     glutMainLoop();
-
-    printf("Goodbye!\n");
-
 }

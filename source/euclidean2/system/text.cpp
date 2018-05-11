@@ -10,6 +10,8 @@ void r_drawChar(int x, int y, int c)
     int width;
     int height;
 
+    glDisable(GL_LIGHTING);
+
     // First we need to save some OpenGL states on the attribute stack
     glPushAttrib(GL_VIEWPORT_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT); // Save the current viewport info, enabled info and context information
 
@@ -38,6 +40,7 @@ void r_drawChar(int x, int y, int c)
     glPopMatrix();
 
     glPopAttrib();
+
 }
 
 void r_drawString(int x, int y, const char* msg)
