@@ -24,6 +24,8 @@ add_executable("${CMAKE_PROJECT_NAME}"
     "euclidean2/math/e_math.cpp"
 
     "euclidean2/camera/camera.cpp"
+
+    "euclidean2/object/water.cpp"
 )
 
 target_link_libraries("${CMAKE_PROJECT_NAME}"

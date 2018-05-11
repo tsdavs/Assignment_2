@@ -10,10 +10,12 @@
 #include "euclidean2/system/light.hpp"
 #include "euclidean2/system/material.hpp"
 
-#include "platform.hpp"
+#include "euclidean2/object/water.hpp"
+
 #include "gl_helper.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cmath>
 #include <ctime>
@@ -22,8 +24,18 @@
 
 static constexpr float MILLISECOND_TIME = 1000.0f;
 
-engine_t engine;	/**< Local engine structure. Not static so we can abuse 'extern'. */
-camera_t cam;
+engine_t    engine;	/**< Local engine structure. Not static so we can abuse 'extern'. */
+camera_t    cam;
+water_t     water;
+
+
+    // Sun (which is bound to GL_LIGHT0)
+GLfloat sun_amb[]   = {0.0f, 0.0f, 0.0f, 1.0f};
+GLfloat sun_dif[]   = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat sun_pos[]   = {1.0f, 1.0f, 0.0f, 0.0f};
+GLfloat sun_spec[]  = {0.5f, 1.0f, 1.0f, 1.0f};
+
+static float t = 0.0f;
 
 extern window_t* hwnd; // YEAH LIVE LIFE ON THE EDGE!
 
@@ -42,9 +54,30 @@ static void i_keyPressed(unsigned char c, int x, int y)
         case 's':
             cam_translate(cam, -0.6f * engine.dt);
             break;
+            
+        case 'n':
+            engine.drawNormals = !engine.drawNormals;
+            break;
+
+        case 'h':
+            engine.running = !engine.running;
+            break;
 
         case 'p':
-            engine.running = !engine.running;
+            if(engine.polygonMode == GL_FILL)
+                engine.polygonMode = GL_LINE;
+            else
+                engine.polygonMode = GL_FILL;
+
+            glPolygonMode(GL_FRONT_AND_BACK, engine.polygonMode);
+            break;
+
+        case '+':
+            water_increaseTesselations(water);
+            break;
+
+        case '-':
+            water_decreaseTesselations(water);
             break;
 
         case 127: // DEL
@@ -66,9 +99,6 @@ static void i_keyPressed(unsigned char c, int x, int y)
 
 static void i_mouseMotion(int x, int y)
 {
-    if(!engine.running)
-        return;
-
     float dx = static_cast<float>(x) - static_cast<float>(hwnd->width / 2);
     float dy = static_cast<float>(y) - static_cast<float>(hwnd->height / 2);
 
@@ -80,6 +110,7 @@ static void i_mouseMotion(int x, int y)
 // Draw 3D axes
 static void r_drawAxes(void)
 {
+	glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(0.0f, 0.0f, 0.0f);
@@ -99,6 +130,7 @@ static void r_drawAxes(void)
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(0.0f, 0.0f, 1.0f);
     glEnd();
+	glEnable(GL_LIGHTING);
 }
 
 static void e_pumpGLError(void)
@@ -140,11 +172,6 @@ static void e_pumpGLError(void)
     }
 }
 
-
-light_t l1;
-material_t m1;
-
-
 /**
  *	Engine draw function
  */
@@ -154,17 +181,20 @@ static void draw(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-	if(!engine.running)
-		return;
-
     // View stuff
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(cam.x, cam.y, cam.z, cam.x + cam.lx, cam.y + cam.ly, cam.z + cam.lz, 0.0f, 1.0f, 0.0f);
+	//gluLookAt(0.0f, -1.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
-	light_enable(l1);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0); 
 
+
+    r_drawAxes();
+
+    water_draw(water, engine.drawNormals);
+    
     if(engine.debug)
     {
         r_drawString(0, 0, "[ DEBUG ]");
@@ -176,18 +206,7 @@ static void draw(void)
 		r_drawString(0, 156, str);
     }
 
-    r_drawAxes();
-
-	glEnable(GL_LIGHTING);
-
-    light_translate(l1, 0.0f, 0.0f, -0.02f);
-    material_bind(m1);
-    glutSolidTeapot(0.4f);
-   
-	light_draw(l1);
-	light_disable(l1);
-	glDisable(GL_LIGHTING);
-
+    glDisable(GL_LIGHTING);
     e_pumpGLError();
 	glutSwapBuffers();
 }
@@ -201,53 +220,61 @@ void e_shutdown()
 void e_update(void)
 {    
     static float prev_t = -1.0f;
-    float t = 0.0f;
     float dt = 0.0f;
 
-    t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
+    if(engine.running)
+        t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
 
     // Skip the first frame to prevent / 0
     // Also keep the clock running even if the sim is paused to dt doesn't become huge
-    if(prev_t < 0.0f || !engine.running)
+    if(prev_t < 0.0f)
     {
   		prev_t = t;	
         glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
         return;
     } 
 
+    glutSetCursor(GLUT_CURSOR_NONE);
+    glutWarpPointer(hwnd->width/2, hwnd->height/2);
+    
     if(engine.running)
     {
-        glutSetCursor(GLUT_CURSOR_NONE);
-        glutWarpPointer(hwnd->width/2, hwnd->height/2);
-    }
+        dt = t - prev_t;
+	    water_animate(water, t, 3);
 
-    dt = t - prev_t;
-
-
-
-    prev_t = t;
-    dt = t - engine.last_frametime;
-    if(dt > 0.2)
-    {        
-        engine.framerate = static_cast<float>(engine.frames)/dt;
-        engine.dt = dt;
-        engine.last_frametime = t;
-        engine.frames = 0;
+        prev_t = t;
+        dt = t - engine.last_frametime;
+        if(dt > 0.2)
+        {           
+            engine.framerate = static_cast<float>(engine.frames)/dt;
+            engine.dt = dt;
+            engine.last_frametime = t;
+            engine.frames = 0;
+        }
     }
     glutPostRedisplay();
 }
 
 static void e_glInit()
 {
-    glShadeModel(GL_SMOOTH);    // Set the shading model
-    glEnable(GL_DEPTH_TEST);    // Enable the Depth test for depth buffer
-    glDepthFunc(GL_LESS);
-
+    glShadeModel(GL_SMOOTH);
     // Enable transparency
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Lighting 
+    glShadeModel(GL_SMOOTH);    // Set the shading model
+    glEnable(GL_DEPTH_TEST);    // Enable the Depth test for depth buffer
+    glDepthFunc(GL_LEQUAL);
+
+    // Material and  Lighting 
+    glEnable(GL_NORMALIZE);
+
+    engine.polygonMode = GL_FILL;
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, sun_amb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_dif);
+    glLightfv(GL_LIGHT0, GL_POSITION, sun_pos);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, sun_spec);
 }
 
 void e_init(int argc, char** argv)
@@ -259,8 +286,11 @@ void e_init(int argc, char** argv)
         printf("arg: %s\n", arg.c_str());
     }
 
+	// Generate a random seed
+	srand(time(NULL));
+
     printf("---- e_init ----\n");
-    r_createWindow(640, 480, "Test");
+    r_createWindow(1024, 768, "Test");
     r_setDrawFunction(&draw);
 
     // Initialize OpenGL paramaters
@@ -268,7 +298,7 @@ void e_init(int argc, char** argv)
     
 	// Engine stuff
     engine.debug            = false;
-    engine.wireframe        = false;
+    engine.drawNormals      = false;
     engine.frames           = 0;
     engine.frame_interval   = 0.2f;
     engine.last_frametime   = 0.0f;
@@ -288,10 +318,9 @@ void e_init(int argc, char** argv)
         glutCloseFunc(e_shutdown);
     #endif
 
-    cam.z = 5.0f;
+    water_generate(water);
 
-    light_create(l1, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 5.0f, 1.0f, 0.3f, 0.02f, GL_LIGHT0);
-    material_create(m1, 0.135f, 0.2225f, 0.1575f, 0.54f, 0.89f, 0.63f, 0.316228f, 0.316228f, 0.316228f, 12.8f);
+    cam.z = 5.0f;
 
     glutMainLoop();
 }

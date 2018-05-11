@@ -27,7 +27,6 @@ void cam_init(camera_t& cam, int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(cam.fov, static_cast<GLfloat>(width/height), 0.0001, 1000.0f);
-    glMatrixMode(GL_MODELVIEW);
 
     cam_update(cam);
 }

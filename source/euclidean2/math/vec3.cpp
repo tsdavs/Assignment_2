@@ -5,6 +5,8 @@
 #include "euclidean2/math/angle.hpp"
 #include "euclidean2/math/e_math.hpp"
 
+#include "platform.hpp"
+
 #include <cmath>
 #include <cstdint>
 
@@ -112,4 +114,15 @@ float v_Angle(vec3_t& vec1, vec3_t& vec2)
     ang     = (dot) / (mag1 * mag2);
 
     return ang;
+}
+
+void v_Draw(vec3_t& pos, vec3_t& vec)
+{
+    glDisable(GL_LIGHTING);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_LINES);
+        glVertex3f(pos.x, pos.y, pos.z);
+        glVertex3f(pos.x + vec.i * 0.05, pos.y + vec.j * 0.05, pos.z + vec.k * 0.05);
+    glEnd();
+    glEnable(GL_LIGHTING);
 }
