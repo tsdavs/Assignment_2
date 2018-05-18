@@ -6,7 +6,9 @@
 
 #include <cstdio>
 
-static GLfloat col_amb[] = {0.0f, 0.0f, 0.0f, 0.0f};
+static GLfloat col_amb[] = {1.0f, 1.0f, 1.0f, 1.0f};
+static GLfloat col_spc[] = {1.0f, 1.0f, 1.0f, 1.0f};
+
 
 static int numActiveLights = 0;
 
@@ -21,7 +23,7 @@ void light_create(light_t& light, GLfloat r, GLfloat g, GLfloat b, GLfloat x, GL
     light.color.x       = r;
     light.color.y       = g;
     light.color.z       = b;
-    light.color.w       = 0.0f;
+    light.color.w       = 1.0f;
 
     light.position.x    = x;
     light.position.y    = y;
@@ -30,16 +32,12 @@ void light_create(light_t& light, GLfloat r, GLfloat g, GLfloat b, GLfloat x, GL
 
     light.lightnum      = lightnum;
 
-    GLfloat l_atten[] = {l_attenuation, 0.0f, 0.0f};
-    GLfloat q_atten[] = {q_attenuation, 0.0f, 0.0f};
-
     glEnable(lightnum);
 
     glLightfv(lightnum, GL_POSITION, reinterpret_cast<float*>(&light.position));
 	glLightfv(lightnum, GL_AMBIENT, col_amb);
     glLightfv(lightnum, GL_DIFFUSE, reinterpret_cast<float*>(&light.color));
-    glLightfv(lightnum, GL_LINEAR_ATTENUATION, l_atten);
-    glLightfv(lightnum, GL_QUADRATIC_ATTENUATION, q_atten);
+	glLightfv(lightnum, GL_SPECULAR, col_spc);
     glDisable(lightnum);
 }
 

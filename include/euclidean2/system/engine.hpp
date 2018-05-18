@@ -7,6 +7,8 @@
 
 #include "euclidean2/system/window.hpp"
 
+#include "platform.hpp"
+
 #include <cstdint>
 
 /**
@@ -18,7 +20,7 @@ typedef struct
 	
 	bool        running;            /**< Is the game currently running??? */
     bool        debug;              /**< Is debug mode enabled? */
-    bool        wireframe;          /**< Should we draw in wireframe mode? */
+    bool        drawNormals;        /**< Should we draw the normals? */
 
     // Timing related stuff
     float       time_elapsed;       /**< Elapsed time since our program started (in ms) */
@@ -27,6 +29,8 @@ typedef struct
     float       last_frametime;
     float       frame_interval;             
 	uint64_t 	frames; 			/**< Frame count */
+
+    GLenum      polygonMode;        /**< Current polygon mode */
 } engine_t;
 
 

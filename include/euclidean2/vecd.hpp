@@ -9,20 +9,20 @@
 /**
  *  Pure data 2d vector
  */
-struct __attribute__((packed)) vec2_data_t
+struct vec2f_t
 {
     GLfloat x;
     GLfloat y;
 };
 
-struct __attribute__((packed)) vec3_data_t
+struct vec3f_t
 {
     GLfloat x;
     GLfloat y;
     GLfloat z;
 };
 
-struct __attribute__((packed)) vec4f_t
+struct vec4f_t
 {
     GLfloat x;
     GLfloat y;

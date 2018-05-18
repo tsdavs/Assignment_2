@@ -87,9 +87,10 @@ float v_GetPitch(vec3_t& vec);
  */
 float v_GetYaw(vec3_t& vec);
 
-
-
-
+/**
+ *  Draw a 3D vector
+ */
+void v_Draw(vec3_t& pos, vec3_t& vec);
 
 
 
