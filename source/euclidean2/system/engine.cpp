@@ -10,6 +10,7 @@
 #include "euclidean2/system/light.hpp"
 #include "euclidean2/system/material.hpp"
 
+#include "euclidean2/object/boat.hpp"
 #include "euclidean2/object/water.hpp"
 
 #include "gl_helper.hpp"
@@ -172,6 +173,8 @@ static void e_pumpGLError(void)
     }
 }
 
+boat_t b;
+
 /**
  *	Engine draw function
  */
@@ -192,9 +195,9 @@ static void draw(void)
 
 
     r_drawAxes();
-
+	boat_draw(b);
     water_draw(water, engine.drawNormals);
-    
+
     if(engine.debug)
     {
         r_drawString(0, 0, "[ DEBUG ]");
@@ -322,5 +325,9 @@ void e_init(int argc, char** argv)
 
     cam.z = 5.0f;
 
+	boat_spawn(b, 0.0f, 0.0f, 0.0f);
+
     glutMainLoop();
+
+
 }

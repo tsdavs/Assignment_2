@@ -142,6 +142,8 @@ static float m_calcDYDZ(float a, float kx, float kz, float x, float z, float w, 
     return kz * a * cosf(kx*x + kz*z + w*t);
 }
 
+// TODO: Make these global so we can use 'extern'
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-conversion" // Stop the compiling from complaining about loss of precision, we don't care.
 void water_animate(water_t& water, float t, int numWaves)
@@ -164,7 +166,6 @@ void water_animate(water_t& water, float t, int numWaves)
         float dydz = 0.0f;
 		for(int j = 0; j < water.tesselations; j++)
 		{
-
             float x = water.verts[i][j].position.x;
             float z = water.verts[i][j].position.z;
 
@@ -176,7 +177,7 @@ void water_animate(water_t& water, float t, int numWaves)
             }
 
             water.verts[i][j].position.y = wave;
-
+			
             water.verts[i][j].normal.i = -dydx;
             water.verts[i][j].normal.j = 1.0f;
             water.verts[i][j].normal.k = -dydz;
@@ -186,42 +187,7 @@ void water_animate(water_t& water, float t, int numWaves)
             dydx = 0.0f;
             dydz = 0.0f;
 
-                    
-            /**
-			float wave1;
-			float wave2;
-			float waveSum;	
-            float dydxSum;
-            float dydzSum;		
-
-			float x = water.verts[i][j].position.x;
-			float z = water.verts[i][j].position.z;
-
-			wave1 = m_calculateSine(a1, kx1, kz1, w1, x, z, t);
-			wave2 = m_calculateSine(a2, kx2, kz2, w2, x, z, t);
-			waveSum = wave1;// + wave2;			
-
-            // Derivatives
-            dydx1 = calcDYDX(a1, kx1, kz1, x, z, w1, t);
-            dydz1 = calcDYDZ(a1, kx1, kz1, x, z, w1, t);
-            
-            dydx2 = calcDYDX(a2, kx2, kz2, x, z, w2, t);
-            dydz2 = calcDYDZ(a2, kx2, kz2, x, z, w2, t);
-
-            dydxSum = dydx1;// + dydx2;
-            dydzSum = dydz1;// + dydz2;
-
-            // The normal vector is defined as <-dydx, 1, -dydz>
-            water.verts[i][j].normal.i = -dydxSum;
-            water.verts[i][j].normal.j = 1.0f;
-            water.verts[i][j].normal.k = -dydzSum;
-            
-            v_Normalize(water.verts[i][j].normal);
-
-			water.verts[i][j].position.y = waveSum;
-
-        */
-		}
+    	}                
 	}
 }
 #pragma GCC diagnostic pop
