@@ -9,6 +9,7 @@ include_directories("../include")
 include_directories(SYSTEM "${GLUT_INCLUDE_DIR}")
 include_directories(SYSTEM "${OPENGL_INCLUDE_DIR}")
 
+
 add_executable("${CMAKE_PROJECT_NAME}"
 
     "euclidean2/main.cpp"
@@ -18,6 +19,8 @@ add_executable("${CMAKE_PROJECT_NAME}"
     "euclidean2/system/text.cpp"
     "euclidean2/system/light.cpp"
     "euclidean2/system/material.cpp"
+    "euclidean2/system/texture.cpp"
+    "euclidean2/system/skybox.cpp"
 
     "euclidean2/math/vec2.cpp"
     "euclidean2/math/vec3.cpp"
@@ -34,6 +37,7 @@ target_link_libraries("${CMAKE_PROJECT_NAME}"
     PRIVATE "${OPENGL_LIBRARIES}"
     PRIVATE "${GLU_LIBRARIES}"
     PRIVATE "${GLUT_LIBRARIES}"
+    PRIVATE "SOIL"
     PRIVATE "m"
 )
 

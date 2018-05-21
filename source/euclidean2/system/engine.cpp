@@ -12,8 +12,10 @@
 
 #include "euclidean2/object/boat.hpp"
 #include "euclidean2/object/water.hpp"
+#include "euclidean2/system/skybox.hpp"
 
 #include "gl_helper.hpp"
+#include "SOIL.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,8 +34,8 @@ water_t     water;
 
     // Sun (which is bound to GL_LIGHT0)
 GLfloat sun_amb[]   = {0.0f, 0.0f, 0.0f, 1.0f};
-GLfloat sun_dif[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-GLfloat sun_pos[]   = {1.0f, 1.0f, 0.0f, 0.0f};
+GLfloat sun_dif[]   = {0.7f, 0.7f, 0.7f, 1.0f};
+GLfloat sun_pos[]   = {-9.0f, 18.0f, -7.0f, 0.0f};
 GLfloat sun_spec[]  = {0.5f, 1.0f, 1.0f, 1.0f};
 
 static float t = 0.0f;
@@ -73,6 +75,16 @@ static void i_keyPressed(unsigned char c, int x, int y)
             glPolygonMode(GL_FRONT_AND_BACK, engine.polygonMode);
             break;
 
+        case 'f':
+            GLboolean fog;
+            glGetBooleanv(GL_FOG, &fog);
+
+            if(fog)
+                glDisable(GL_FOG);
+            else
+                glEnable(GL_FOG);
+            break;
+
         case '+':
             water_increaseTesselations(water);
             break;
@@ -80,6 +92,19 @@ static void i_keyPressed(unsigned char c, int x, int y)
         case '-':
             water_decreaseTesselations(water);
             break;
+
+        case 'r':
+        {
+            time_t rawtime;
+            struct tm * timeinfo;
+            std::string a;
+            time (&rawtime);
+            timeinfo = localtime(&rawtime);
+            a = std::string(asctime (timeinfo));
+            a += ".bmp";
+            SOIL_save_screenshot(a.c_str(), SOIL_SAVE_TYPE_BMP, 0, 0, 1024, 768);
+            break;
+        }
 
         case 127: // DEL
             engine.debug = !engine.debug;
@@ -193,9 +218,10 @@ static void draw(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); 
 
+    skybox_draw();
 
     r_drawAxes();
-	boat_draw(b);
+	//boat_draw(b);
     water_draw(water, engine.drawNormals);
 
     if(engine.debug)
@@ -269,6 +295,7 @@ static void e_glInit()
     glEnable(GL_DEPTH_TEST);    // Enable the Depth test for depth buffer
     glDepthFunc(GL_LEQUAL);
 
+    
     // Material and  Lighting 
     glEnable(GL_NORMALIZE);
 
@@ -278,6 +305,15 @@ static void e_glInit()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_dif);
     glLightfv(GL_LIGHT0, GL_POSITION, sun_pos);
     glLightfv(GL_LIGHT0, GL_SPECULAR, sun_spec);
+
+    // Fog
+    GLfloat fogCol[4] = {0.7f, 0.7f, 0.7f, 1.0f};
+    glEnable(GL_FOG);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_START, 3.0f);
+    glFogf(GL_FOG_END, 23.0f);
+    glFogf(GL_FOG_DENSITY, 0.35);
+    glFogfv(GL_FOG_COLOR, fogCol);
 }
 
 void e_init(int argc, char** argv)
@@ -323,6 +359,8 @@ void e_init(int argc, char** argv)
 
     water_generate(water);
 
+    skybox_init();
+
     cam.z = 5.0f;
 
 	boat_spawn(b, 0.0f, 0.0f, 0.0f);
@@ -331,3 +369,4 @@ void e_init(int argc, char** argv)
 
 
 }
+ 

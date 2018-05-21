@@ -4,6 +4,8 @@
 #ifndef _PLATFORM_H_INCLUDED_
 #define _PLATFORM_H_INCLUDED
 
+#define GL_GLEXT_PROTOTYPES
+
 #if defined(_WIN32) && defined(_MSC_VER) // Only inlcude windows.h if we're using Windows AND a non GNU compliler!
     #include <windows.h>
 #endif
@@ -11,10 +13,11 @@
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
     #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
-    
+    #include <GL/glext.h>
     /**
      *  Check for FreeGLUT (Linux only for now [because that's what we're targetting!])
      *  This is passed in from the cmake file using the -D flag

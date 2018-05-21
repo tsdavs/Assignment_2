@@ -3,9 +3,7 @@
  */
 #include "euclidean2/object/boat.hpp"
 
-#include <vector>
-
-extern void 
+#include <vector> 
 
 void boat_spawn(boat_t& b, float x, float y, float z)
 {
