@@ -16,6 +16,18 @@ static constexpr float RANGE = RIGHT - LEFT;
 
 static ground_t ground;
 
+// Wave constants
+// Wave 1
+// Static cast to shut g++ up about -Wfloat-conversion!
+//Jesse double check here if this is what you want
+float a[]   = {0.13f, 0.05f, 0.15f};
+float kx[]  = {2*M_PI, M_PI, -M_PI_4};
+float kz[]  = {M_PI, -2*M_PI, M_PI / 8.0f};
+float w[]   = {M_PI, -M_PI_4, M_PI_2};
+//vertex3f_t vert;
+
+vertex3f_t v1;
+
 void water_generate(water_t& water)
 {
     float xStep = RANGE/static_cast<float>(water.tesselations);
@@ -75,7 +87,7 @@ void water_draw(water_t& water, bool drawNorms)
         glBegin(GL_QUAD_STRIP);
         for(int j = 0; j < water.tesselations; j++)
         {
-            vertex3f_t v1;
+            //vertex3f_t v1;
             vertex3f_t v2;
 
             v1 = water.verts[i][j];
@@ -127,17 +139,17 @@ void water_drawGround(ground_t& ground)
 /**
  * Calculate the sine wave for a given amplitude, kx, kz
  */ 
-static inline float m_calculateSine(float a, float kx, float kz, float w, float x, float z, float t)
+inline float m_calculateSine(float a, float kx, float kz, float w, float x, float z, float t)
 {
     return  a * sinf(kx*x + kz*z + w*t);
 }
 
-static float m_calcDYDX(float a, float kx, float kz, float x, float z, float w, float t)
+inline float m_calcDYDX(float a, float kx, float kz, float x, float z, float w, float t)
 {
     return kx * a * cosf(kx*x + kz*z + w*t);
 }
 
-static float m_calcDYDZ(float a, float kx, float kz, float x, float z, float w, float t)
+inline float m_calcDYDZ(float a, float kx, float kz, float x, float z, float w, float t)
 {
     return kz * a * cosf(kx*x + kz*z + w*t);
 }
@@ -148,22 +160,14 @@ static float m_calcDYDZ(float a, float kx, float kz, float x, float z, float w, 
 #pragma GCC diagnostic ignored "-Wfloat-conversion" // Stop the compiling from complaining about loss of precision, we don't care.
 void water_animate(water_t& water, float t, int numWaves)
 {
-	// Wave constants
-	// Wave 1
-    // Static cast to shut g++ up about -Wfloat-conversion!
-    float a[]   = {0.13f, 0.05f, 0.15};
-    float kx[]  = {2*M_PI, M_PI, -M_PI_4};
-    float kz[]  = {M_PI, -2*M_PI, M_PI / 8};
-    float w[]   = {M_PI, -M_PI_4, M_PI_2};
-
-
 	//float dydx1, dydz1, dydx2, dydz2;
 	
 	for(int i = 0; i < water.tesselations; i++)
 	{
-        float wave = 0.0f;
         float dydx = 0.0f;
         float dydz = 0.0f;
+        float wave = 0.0f;
+
 		for(int j = 0; j < water.tesselations; j++)
 		{
             float x = water.verts[i][j].position.x;
