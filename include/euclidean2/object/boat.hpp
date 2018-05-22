@@ -19,6 +19,7 @@ void boat_spawn(boat_t& b, float x, float y, float z);
 
 void boat_draw(boat_t& b);
 
+void boat_animate(boat_t& b, float t, int numWaves);
 
 
 

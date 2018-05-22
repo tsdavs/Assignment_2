@@ -12,7 +12,7 @@
  */
 struct vertex3f_t
 {
-    vec3_t position;   /**< This vertex's position in 3D space */
+    vec3_t  position;   /**< This vertex's position in 3D space */
     vec3_t  normal;     /**< This vertex's normal vector */
     vec3_t  tangent;    /**< This vertex's tangent vector */
     vec3_t  binormal;   /**< This vertex's binormal vector */

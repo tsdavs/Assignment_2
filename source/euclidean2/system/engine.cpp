@@ -194,7 +194,7 @@ static void draw(void)
     glEnable(GL_LIGHT0); 
 
 
-    r_drawAxes();
+    //r_drawAxes();
 	boat_draw(b);
     water_draw(water, engine.drawNormals);
 
@@ -244,6 +244,7 @@ void e_update(void)
     {
         dt = t - prev_t;
 	    water_animate(water, t, 3);
+        boat_animate(b, t, 3);
 
         prev_t = t;
         dt = t - engine.last_frametime;
