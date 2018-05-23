@@ -26,6 +26,14 @@ void boat_spawn(boat_t& b, float x, float y, float z)
 	b.position.y = y;
 	b.position.z = z;
 
+	b.position.i = -b.position.x;
+	b.position.j = -b.position.y;
+	b.position.k = -b.position.z;
+
+    b.stopping_pos = (static_cast<float>(rand())/(static_cast<float>(RAND_MAX)/10.f))+2.0f;
+
+	b.mag = v_Magnitude(b.position);
+
 	material_create(b.mat, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 2.0f);
 }
 
@@ -40,12 +48,24 @@ void boat_draw(boat_t& b)
 	glutSolidTeapot(0.2f);
 
 	glPopMatrix();
-
 }
 
 void boat_animate(boat_t& b, float t, int numWaves)
 {
     float wave = 0.0f;
+
+    float pos = sqrt(b.position.x*b.position.x + b.position.z*b.position.z);
+
+    if(pos >= b.stopping_pos)
+    {
+    	b.position.x += (b.position.i/b.mag) * t/500.0f; 
+    	b.position.z += (b.position.k/b.mag) * t/500.0f; 
+    }
+    else
+    {
+    	//x=cos(angle) * b.stopping_pos
+    	//z=sin(angle) * b.stopping_pos
+    }
 
 	for(int n = 0; n < numWaves; n++)
 	{
@@ -54,6 +74,11 @@ void boat_animate(boat_t& b, float t, int numWaves)
 
 	b.position.y = wave;
 	wave = 0.0f;
+}
+
+void boat_shoot(boat_t& b, float t)
+{
+	
 }
 
 

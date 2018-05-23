@@ -270,9 +270,7 @@ void e_update(void)
         {
             boat_t tmp_b;
 
-            float pos = ((float)rand()/(float)(RAND_MAX/divisor)) - 15.0f;
-
-            printf("%f\n",pos);
+            float pos = (static_cast<float>(rand())/(static_cast<float>(RAND_MAX)/divisor)) - 15.0f;
 
             if(strcmp(direction[tmp], "north") == 0)
             {
