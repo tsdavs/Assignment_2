@@ -12,6 +12,7 @@
 
 #include "euclidean2/object/boat.hpp"
 #include "euclidean2/object/water.hpp"
+#include "euclidean2/system/skybox.hpp"
 
 #include "gl_helper.hpp"
 
@@ -34,8 +35,8 @@ water_t     water;
 
     // Sun (which is bound to GL_LIGHT0)
 GLfloat sun_amb[]   = {0.0f, 0.0f, 0.0f, 1.0f};
-GLfloat sun_dif[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-GLfloat sun_pos[]   = {1.0f, 1.0f, 0.0f, 0.0f};
+GLfloat sun_dif[]   = {0.7f, 0.7f, 0.7f, 1.0f};
+GLfloat sun_pos[]   = {-9.0f, 18.0f, -7.0f, 0.0f};
 GLfloat sun_spec[]  = {0.5f, 1.0f, 1.0f, 1.0f};
 
 static float t = 0.0f;
@@ -197,6 +198,8 @@ static void draw(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); 
 
+	skybox_draw();
+
     for(size_t i = 0; i < boats.size(); i++)
     {
         boat_draw(boats.at(i));
@@ -228,7 +231,7 @@ void e_shutdown()
 
 static float timer_counter = 0;
 int tmp = 0;
-float divisor = 4.0f;
+float divisor = 30.0f;
 
 void e_update(void)
 {    
@@ -267,25 +270,25 @@ void e_update(void)
         {
             boat_t tmp_b;
 
-            float pos = ((float)rand()/(float)(RAND_MAX/divisor)) - 2.0f;
+            float pos = ((float)rand()/(float)(RAND_MAX/divisor)) - 15.0f;
 
             printf("%f\n",pos);
 
             if(strcmp(direction[tmp], "north") == 0)
             {
-                boat_spawn(tmp_b, pos, 0.0f, 2.0f);
+                boat_spawn(tmp_b, pos, 0.0f, 15.0f);
             }
             else if(strcmp(direction[tmp], "south") == 0)
             {
-                boat_spawn(tmp_b, pos, 0.0f, -2.0f);
+                boat_spawn(tmp_b, pos, 0.0f, -15.0f);
             }
             else if(strcmp(direction[tmp], "east") == 0)
             {
-                boat_spawn(tmp_b, 2.0f, 0.0f, pos);
+                boat_spawn(tmp_b, 15.0f, 0.0f, pos);
             }
             else if(strcmp(direction[tmp], "west") == 0)
             {
-                boat_spawn(tmp_b, -2.0f, 0.0f, pos);
+                boat_spawn(tmp_b, -15.0f, 0.0f, pos);
             }
             
             boats.push_back(tmp_b);
@@ -380,7 +383,7 @@ void e_init(int argc, char** argv)
 
     cam.z = 5.0f;
 
-	//boat_spawn(b, 0.0f, 0.0f, 0.0f);
+	skybox_init();
 
     glutMainLoop();
 
