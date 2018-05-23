@@ -5,14 +5,12 @@
 #define _BOAT_HPP_INCLUDED_
 
 #include "euclidean2/system/material.hpp"
+#include "euclidean2/math/vec3.hpp"
 
 struct boat_t
 {
-	float 		x;		/**< Boat x position */
-	float 		y;		/**< Boat y position */
-	float 		z;		/**< Boat z position */
-
-	material_t 	mat; 	/**< Boat material */
+	vec3_t position;	/**< Boat vector */
+	material_t 	mat; 		/**< Boat material */
 };
 
 void boat_spawn(boat_t& b, float x, float y, float z);
@@ -26,3 +24,4 @@ void boat_animate(boat_t& b, float t, int numWaves);
 
 
 #endif
+

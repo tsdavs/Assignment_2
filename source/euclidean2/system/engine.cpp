@@ -25,6 +25,8 @@
 
 static constexpr float MILLISECOND_TIME = 1000.0f;
 
+const int NUM_SECONDS = 1;
+
 engine_t    engine;	/**< Local engine structure. Not static so we can abuse 'extern'. */
 camera_t    cam;
 water_t     water;
@@ -173,7 +175,9 @@ static void e_pumpGLError(void)
     }
 }
 
-boat_t b;
+//boat_t b;
+
+std::vector<boat_t> boats;
 
 /**
  *	Engine draw function
@@ -193,9 +197,11 @@ static void draw(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); 
 
+    for(size_t i = 0; i < boats.size(); i++)
+    {
+        boat_draw(boats.at(i));
+    }
 
-    //r_drawAxes();
-	boat_draw(b);
     water_draw(water, engine.drawNormals);
 
     if(engine.debug)
@@ -220,10 +226,15 @@ void e_shutdown()
     r_freeWindow();
 }
 
+static float timer_counter = 0;
+int tmp = 0;
+float divisor = 4.0f;
+
 void e_update(void)
 {    
     static float prev_t = -1.0f;
     float dt = 0.0f;
+    char * direction[4] = {"north", "south", "east", "west"};
 
     if(engine.running)
         t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
@@ -244,7 +255,50 @@ void e_update(void)
     {
         dt = t - prev_t;
 	    water_animate(water, t, 3);
-        boat_animate(b, t, 3);
+
+        timer_counter += dt;
+
+        for(size_t i = 0; i < boats.size(); i++)
+        {
+            boat_animate(boats.at(i), t, 3);
+        }
+
+        if((timer_counter > 1.0f))
+        {
+            boat_t tmp_b;
+
+            float pos = ((float)rand()/(float)(RAND_MAX/divisor)) - 2.0f;
+
+            printf("%f\n",pos);
+
+            if(strcmp(direction[tmp], "north") == 0)
+            {
+                boat_spawn(tmp_b, pos, 0.0f, 2.0f);
+            }
+            else if(strcmp(direction[tmp], "south") == 0)
+            {
+                boat_spawn(tmp_b, pos, 0.0f, -2.0f);
+            }
+            else if(strcmp(direction[tmp], "east") == 0)
+            {
+                boat_spawn(tmp_b, 2.0f, 0.0f, pos);
+            }
+            else if(strcmp(direction[tmp], "west") == 0)
+            {
+                boat_spawn(tmp_b, -2.0f, 0.0f, pos);
+            }
+            
+            boats.push_back(tmp_b);
+
+            tmp++;
+
+            if(tmp == 4)
+            {
+                tmp = 0;
+            }
+
+            timer_counter = 0;
+        }
 
         prev_t = t;
         dt = t - engine.last_frametime;
@@ -326,9 +380,10 @@ void e_init(int argc, char** argv)
 
     cam.z = 5.0f;
 
-	boat_spawn(b, 0.0f, 0.0f, 0.0f);
+	//boat_spawn(b, 0.0f, 0.0f, 0.0f);
 
     glutMainLoop();
 
 
 }
+
