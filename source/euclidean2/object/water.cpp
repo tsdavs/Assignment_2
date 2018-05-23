@@ -10,11 +10,12 @@
 
 #include <cstdlib>
 
-static constexpr float LEFT = -2.0f;
-static constexpr float RIGHT = 2.0f;
+static constexpr float LEFT = -15.0f;
+static constexpr float RIGHT = 15.0f;
 static constexpr float RANGE = RIGHT - LEFT;
 
-static ground_t ground;
+static constexpr int	GROUND_TESS = 32;
+static ground_t 		ground;
 
 // Wave constants
 // Wave 1
@@ -50,19 +51,21 @@ void water_generate(water_t& water)
         }
     }
 
+	// Generate the ground
+    texture_load(ground.tex, "res/sand.tga"); // Generate land texture
     
-    xStep = RANGE/128;
+    xStep = RANGE/GROUND_TESS;
     zStep = xStep;
-    for(int i = 0; i < 128; i++)
+    for(int i = 0; i < GROUND_TESS; i++)
     {
         z = LEFT + static_cast<float>(i) * zStep;
-        for(int j = 0; j < 128; j++)
+        for(int j = 0; j < GROUND_TESS; j++)
         {
             vertex3f_t vert;
 
             x = LEFT + static_cast<float>(j) * xStep;  
             vert.position.x = x;
-            vert.position.y = -0.4f;
+            vert.position.y = -0.6f;
             vert.position.z = z;
             ground.verts[i][j] = vert;
         } 
@@ -71,7 +74,7 @@ void water_generate(water_t& water)
     material_create(water.mat, 0.0f, 0.97f, 0.97f, 1.0f, 1.0f, 1.0f, 128.0f);
     material_setAlpha(water.mat, 0.50f);
 
-    material_create(ground.mat, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f, 0.5f, 1.0f);
+    material_create(ground.mat, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
     material_setAlpha(ground.mat, 1.0f);
 }
 
@@ -84,7 +87,7 @@ void water_draw(water_t& water, bool drawNorms)
 	for(int i = 0; i < water.tesselations - 1; i++)
     {
         material_bind(water.mat);
-        glBegin(GL_QUAD_STRIP);
+        glBegin(GL_TRIANGLE_STRIP);
         for(int j = 0; j < water.tesselations; j++)
         {
             //vertex3f_t v1;
@@ -113,13 +116,24 @@ void water_draw(water_t& water, bool drawNorms)
     }
 }
 
+
 void water_drawGround(ground_t& ground)
 {
-    for(int i = 0; i < 128 - 1; i++)
+    GLfloat u, v;
+    
+    u = 0.0f;
+    v = 1.0f;
+
+    glDisable(GL_LIGHTING);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glEnable(GL_TEXTURE_2D);
+    texture_bind(ground.tex);
+    material_bind(ground.mat);
+
+    for(int i = 0; i < GROUND_TESS - 1; i++)
     {
-        material_bind(ground.mat);
         glBegin(GL_TRIANGLE_STRIP);
-        for(int j = 0; j < 128; j++)
+        for(int j = 0; j < GROUND_TESS; j++)
         {
             vertex3f_t v1;
             vertex3f_t v2;
@@ -127,13 +141,31 @@ void water_drawGround(ground_t& ground)
             v1 = ground.verts[i][j];
             v2 = ground.verts[i+1][j];
             
+            if(u >= 1.0f)
+                u = 0.0f;
+            else
+                u = 1.0f;
+
+            if(v >= 1.0f)
+                v = 0.0f;
+            else
+                v = 1.0f;
+
+            glTexCoord2f(u, v);
             glNormal3f(v1.normal.i, v1.normal.j, v1.normal.k);
             glVertex3f(v1.position.x, v1.position.y, v1.position.z);
+            
+            u = 1.0f;
+            glTexCoord2f(u, v);
             glNormal3f(v2.normal.i, v2.normal.j, v2.normal.k);
             glVertex3f(v2.position.x, v2.position.y, v2.position.z);
         }
         glEnd();
     }
+    
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+    texture_unbind();
 }
 
 /**
@@ -195,3 +227,4 @@ void water_animate(water_t& water, float t, int numWaves)
 	}
 }
 #pragma GCC diagnostic pop
+
