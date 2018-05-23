@@ -6,6 +6,7 @@
 
 #include "euclidean2/vertex.hpp"
 #include "euclidean2/system/material.hpp"
+#include "euclidean2/system/texture.hpp"
 
 #include <climits>
 #include <vector>
@@ -23,6 +24,7 @@ struct water_t
 struct ground_t
 {
     vertex3f_t  verts[128][128]; // We don't need too many tesselations for the seafloor
+    texture_t   tex;
     material_t  mat;
 };
 
@@ -72,3 +74,4 @@ static inline void water_decreaseTesselations(water_t& water)
 
 
 #endif
+
