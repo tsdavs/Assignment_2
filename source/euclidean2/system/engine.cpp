@@ -263,16 +263,14 @@ void e_update(void)
 
         for(size_t i = 0; i < boats.size(); i++)
         {
-            boat_animate(boats.at(i), t, 3);
+            boat_animate(boats.at(i), dt, 3);
         }
 
         if((timer_counter > 1.0f))
         {
             boat_t tmp_b;
 
-            float pos = ((float)rand()/(float)(RAND_MAX/divisor)) - 15.0f;
-
-            printf("%f\n",pos);
+            float pos = (static_cast<float>(rand())/(static_cast<float>(RAND_MAX)/divisor)) - 15.0f;
 
             if(strcmp(direction[tmp], "north") == 0)
             {

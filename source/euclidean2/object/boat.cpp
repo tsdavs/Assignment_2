@@ -26,6 +26,16 @@ void boat_spawn(boat_t& b, float x, float y, float z)
 	b.position.y = y;
 	b.position.z = z;
 
+	b.position.i = -b.position.x;
+	b.position.j = -b.position.y;
+	b.position.k = -b.position.z;
+
+    b.stopping_pos = (static_cast<float>(rand())/(static_cast<float>(RAND_MAX)/10.f))+2.0f;
+
+	b.mag = v_Magnitude(b.position);
+
+	b.rotation_y;
+
 	material_create(b.mat, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 2.0f);
 }
 
@@ -35,17 +45,32 @@ void boat_draw(boat_t& b)
 	glTranslatef(b.position.x, b.position.y, b.position.z);
 
 	glRotatef(ANG_2_DEGREES(v1.normal.i), ANG_2_DEGREES(v1.normal.j), ANG_2_DEGREES(v1.normal.k),1.0f);
+    glRotatef(b.rotation_y + 90.0f, 0.0f, 1.0f, 0.0f);
 
 	material_bind(b.mat);
 	glutSolidTeapot(0.2f);
 
 	glPopMatrix();
-
 }
 
 void boat_animate(boat_t& b, float t, int numWaves)
 {
     float wave = 0.0f;
+
+    float pos = sqrt(b.position.x*b.position.x + b.position.z*b.position.z);
+
+    b.rotation_y = ARTAN_D(b.position.i/b.position.k);
+
+    if(pos >= b.stopping_pos)
+    {
+    	b.position.x += (b.position.i/b.mag) * t; 
+    	b.position.z += (b.position.k/b.mag) * t; 
+    }
+    else
+    {
+    	//x=cos(angle) * b.stopping_pos
+    	//z=sin(angle) * b.stopping_pos
+    }
 
 	for(int n = 0; n < numWaves; n++)
 	{
@@ -54,6 +79,11 @@ void boat_animate(boat_t& b, float t, int numWaves)
 
 	b.position.y = wave;
 	wave = 0.0f;
+}
+
+void boat_shoot(boat_t& b, float t)
+{
+	
 }
 
 
