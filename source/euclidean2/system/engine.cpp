@@ -13,6 +13,7 @@
 #include "euclidean2/object/boat.hpp"
 #include "euclidean2/object/water.hpp"
 #include "euclidean2/system/skybox.hpp"
+#include "euclidean2/object/cannon.hpp"
 
 #include "gl_helper.hpp"
 
@@ -31,7 +32,7 @@ const int NUM_SECONDS = 1;
 engine_t    engine;	/**< Local engine structure. Not static so we can abuse 'extern'. */
 camera_t    cam;
 water_t     water;
-
+cannon_t	cannon;
 
     // Sun (which is bound to GL_LIGHT0)
 GLfloat sun_amb[]   = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -42,6 +43,30 @@ GLfloat sun_spec[]  = {0.5f, 1.0f, 1.0f, 1.0f};
 static float t = 0.0f;
 
 extern window_t* hwnd; // YEAH LIVE LIFE ON THE EDGE!
+
+static void i_specialKeyPressed(int key, int x, int y)
+{
+	switch(key)
+	{
+		case GLUT_KEY_LEFT:
+			cannon_yaw(cannon, -1.0f);
+			break;
+		case GLUT_KEY_RIGHT:
+			cannon_yaw(cannon, 1.0f);
+			break;
+
+		case GLUT_KEY_UP:
+			cannon_pitch(cannon, 1.0f);
+			break;
+		
+		case GLUT_KEY_DOWN:
+			cannon_pitch(cannon, -1.0f);
+			break;
+
+		default:
+			break;
+	}
+}
 
 static void i_keyPressed(unsigned char c, int x, int y)
 {
@@ -189,6 +214,19 @@ static void draw(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	/**
+	glDisable(GL_DEPTH_TEST);
+	glPushMatrix();
+	glLoadIdentity();
+	glRotatef(sinf(cam.lx * (180/M_PI)), 1.0f, 0.0f, 0.0f);
+	glRotatef(sinf(cam.ly * (180/M_PI)), 0.0f, 1.0f, 0.0f);
+	glRotatef(sinf(cam.lz * (180/M_PI)), 0.0f, 0.0f, 1.0f);
+	skybox_draw();
+	glPopMatrix();
+	glEnable(GL_DEPTH_TEST);
+	**/
+
+
     // View stuff
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -198,7 +236,7 @@ static void draw(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); 
 
-	skybox_draw();
+	cannon_draw(cannon);
 
     for(size_t i = 0; i < boats.size(); i++)
     {
@@ -371,7 +409,8 @@ void e_init(int argc, char** argv)
 
 	glutIdleFunc(e_update);
     glutKeyboardFunc(i_keyPressed);
-    glutPassiveMotionFunc(i_mouseMotion);
+    glutSpecialFunc(i_specialKeyPressed);
+	glutPassiveMotionFunc(i_mouseMotion);
 
     #ifdef FREEGLUT
         glutCloseFunc(e_shutdown);
@@ -382,6 +421,8 @@ void e_init(int argc, char** argv)
     cam.z = 5.0f;
 
 	skybox_init();
+
+	cannon_init(cannon, 10, 10, 1.0f, 1.0f, 0.1f);
 
     glutMainLoop();
 
