@@ -13,6 +13,7 @@ struct boat_t
 	material_t 	mat; 		/**< Boat material */
 	float mag;
 	float stopping_pos;
+	float rotation_y;
 
 };
 

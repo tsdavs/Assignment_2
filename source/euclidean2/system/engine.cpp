@@ -263,7 +263,7 @@ void e_update(void)
 
         for(size_t i = 0; i < boats.size(); i++)
         {
-            boat_animate(boats.at(i), t, 3);
+            boat_animate(boats.at(i), dt, 3);
         }
 
         if((timer_counter > 1.0f))
