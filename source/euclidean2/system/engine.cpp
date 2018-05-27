@@ -45,6 +45,9 @@ static float t = 0.0f;
 
 extern window_t* hwnd; // YEAH LIVE LIFE ON THE EDGE!
 
+static bool gameOver = false;
+
+static float zoomZ = 0.0f;
 static void i_specialKeyPressed(int key, int x, int y)
 {
 	switch(key)
@@ -193,6 +196,30 @@ static void i_keyPressed(unsigned char c, int x, int y)
     }
 }
 
+float zoom = 1.0f;
+static void i_mouse(int button, int state, int x, int y)
+{
+    if(cam.mode == CAMERA_MODES::CAM_LOCKED)
+    {
+        if(button == 3)
+        {
+            if(state == GLUT_DOWN)
+            {
+                glTranslatef(0.0f, 0.0f, 0.1f);
+                zoomZ += 0.1f;
+            }
+        }
+        else if(button == 4)
+        {
+            if(state == GLUT_DOWN)
+            {
+                glTranslatef(0.0f, 0.0f, -0.1f);
+                zoomZ -= 0.1f;
+            }
+        }
+    }
+}
+
 static void i_mouseMotion(int x, int y)
 {
     float dx = static_cast<float>(x) - static_cast<float>(hwnd->width / 2);
@@ -279,11 +306,50 @@ static void e_pumpGLError(void)
 
 static void r_reshapeFunc(int w, int h)
 {
+    hwnd->width = w;
+    hwnd->height = h;
     cam_refresh(cam);
 }
 
 std::vector<boat_t> boats;
 
+static void drawHealth()
+{
+    // DRAW HEALTH BAR
+    // First we need to save some OpenGL states on the attribute stack
+    glPushAttrib(GL_VIEWPORT_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT); // Save the current viewport info, enabled info and context information
+
+    // Save the current projection matrix (so we can restore it later)
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(0.7, 1.0);
+        glVertex2f(0.7 + (cannon.hp * 0.003), 1.0f);
+        glVertex2f(0.7 + (cannon.hp * 0.003), 0.95);
+        glVertex2f(0.7, 0.95);
+    glEnd();
+
+    glPopMatrix();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glPopAttrib();
+}
+
+
+float meme = 1.0f;
 /**
  *	Engine draw function
  */
@@ -365,6 +431,19 @@ static void draw(void)
 
     water_draw(water, engine.drawNormals);
 
+    if(gameOver)
+    {
+        r_drawString(hwnd->width / 2 - 10, hwnd->height / 2, "G A M E   O V E R ! ! !");
+    }
+
+    sprintf(str, "Score: %d", cannon.score);
+    r_drawString(hwnd->width - 100, 26.,str);
+
+    drawHealth();
+
+    // Uncomment this for some Intestellar type shit
+    //glScalef(zoom, zoom, 1.0f);
+
     if(engine.debug)
     {
         r_drawString(0, 0, "[ DEBUG ]");
@@ -402,6 +481,12 @@ void e_update(void)
     static float prev_t = -1.0f;
     float dt = 0.0f;
     std::string direction[4] = {"north", "south", "east", "west"};
+
+    if(cannon.hp <= 0)
+    {
+        gameOver = true;
+        engine.running = false;
+    }
 
     t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
 
@@ -561,6 +646,7 @@ void e_init(int argc, char** argv)
     engine.fogEnable        = true;
     engine.holdMouse        = true;
     engine.mouseControl     = true;
+    gameOver = false;
 
     cam_init(cam, hwnd->width, hwnd->height);
 
@@ -569,6 +655,7 @@ void e_init(int argc, char** argv)
 	glutIdleFunc(e_update);
     glutKeyboardFunc(i_keyPressed);
     glutSpecialFunc(i_specialKeyPressed);
+    glutMouseFunc(i_mouse);
 	glutPassiveMotionFunc(i_mouseMotion);
     glutReshapeFunc(r_reshapeFunc);
 
