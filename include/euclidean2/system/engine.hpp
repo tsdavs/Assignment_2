@@ -21,6 +21,8 @@ typedef struct
 	bool        running;            /**< Is the game currently running??? */
     bool        debug;              /**< Is debug mode enabled? */
     bool        drawNormals;        /**< Should we draw the normals? */
+    bool        lighting;           /**< Is lighting enabled or disabled? */
+    bool        textures;           /**< Is texturing enabled or disabled? */
 
     // Timing related stuff
     float       time_elapsed;       /**< Elapsed time since our program started (in ms) */

@@ -24,6 +24,8 @@ void cam_init(camera_t& cam, int width, int height)
     cam.pitch   = 0.0f;
     cam.yaw     = -90.0f;
 
+    cam.mode    = CAMERA_MODES::CAM_LOCKED;
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(cam.fov, static_cast<GLfloat>(width/height), 0.0001, 1000.0f);

@@ -110,7 +110,9 @@ void water_draw(water_t& water, bool drawNorms)
         {
             for(int j = 0; j < water.tesselations; j++)
             {
-			    v_Draw(water.verts[i][j].position, water.verts[i][j].normal);
+			    v_Draw(water.verts[i][j].position, water.verts[i][j].normal, 1.0f, 0.0f, 0.0f);
+                v_Draw(water.verts[i][j].position, water.verts[i][j].tangent, 0.0f, 1.0f, 1.0f);
+                v_Draw(water.verts[i][j].position, water.verts[i][j].binormal, 1.0f, 0.0f, 1.0f);
             }
         }
     }
@@ -124,9 +126,9 @@ void water_drawGround(ground_t& ground)
     u = 0.0f;
     v = 1.0f;
 
+    glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_LIGHTING);
     glColor3f(1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
     texture_bind(ground.tex);
     material_bind(ground.mat);
 
@@ -162,9 +164,9 @@ void water_drawGround(ground_t& ground)
         }
         glEnd();
     }
-    
-    glDisable(GL_TEXTURE_2D);
+
     glEnable(GL_LIGHTING);
+    glPopAttrib();
     texture_unbind();
 }
 
@@ -213,6 +215,16 @@ void water_animate(water_t& water, float t, int numWaves)
             }
 
             water.verts[i][j].position.y = wave;
+
+            water.verts[i][j].tangent.i = 1.0f;
+            water.verts[i][j].tangent.j = dydx;
+            water.verts[i][j].tangent.k = 0.0f;
+            v_Normalize(water.verts[i][j].tangent);
+
+            water.verts[i][j].binormal.i = 0.0f;
+            water.verts[i][j].binormal.j = dydz;
+            water.verts[i][j].binormal.k = 1.0f;
+            v_Normalize(water.verts[i][j].binormal);
 			
             water.verts[i][j].normal.i = -dydx;
             water.verts[i][j].normal.j = 1.0f;

@@ -12,24 +12,27 @@ static constexpr float GRAVITY = -9.8f;
 
 struct projectile_t
 {
-	vec3_t position;
-	vec3_t velocity;	
+	vec3_t     position;
+	vec3_t     velocity;	
+
+    material_t mat;
 };
 
 /**
  *	Create a projectile
  */
-void projectile_create(float x, float y, float z, float pitch, float yaw);
+void projectile_create(float x, float y, float z, float pitch, float yaw, float power);
+void projectile_create(float x, float y, float z, float pitch, float vx, float vz, float power);
 
 /**
  * Update a projectile
  */
-void projectile_update(projectile_t& proj);
+void projectile_update(float dt);
 
 /**
  * Draw a projectile
  */
-void projectile_draw(projectile_t& proj);
+void projectile_draw();
 
 
 

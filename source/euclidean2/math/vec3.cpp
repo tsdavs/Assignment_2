@@ -118,8 +118,22 @@ float v_Angle(vec3_t& vec1, vec3_t& vec2)
 
 void v_Draw(vec3_t& pos, vec3_t& vec)
 {
+    glPushAttrib(GL_ENABLE_BIT);
+
     glDisable(GL_LIGHTING);
     glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_LINES);
+        glVertex3f(pos.x, pos.y, pos.z);
+        glVertex3f(pos.x + vec.i * 0.05, pos.y + vec.j * 0.05, pos.z + vec.k * 0.05);
+    glEnd();
+
+    glPopAttrib();
+}
+
+void v_Draw(vec3_t& pos, vec3_t& vec, float r, float g, float b)
+{
+    glDisable(GL_LIGHTING);
+    glColor3f(r, g, b);
     glBegin(GL_LINES);
         glVertex3f(pos.x, pos.y, pos.z);
         glVertex3f(pos.x + vec.i * 0.05, pos.y + vec.j * 0.05, pos.z + vec.k * 0.05);

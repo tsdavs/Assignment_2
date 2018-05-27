@@ -45,7 +45,14 @@ void cannon_init(cannon_t& cannon, int stacks, int slices, float length, float h
 	cannon.pitch	= 45.0f;
 	cannon.yaw		= 0.0f;
 
-	material_create(cannon.mat, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 20.0f);
+    cannon.islandRad = 1.6f;
+
+    cannon.power    = 7.0f;
+
+	material_create(cannon.mat, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 20.0f);
+    material_create(cannon.islandMat, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 2.0f);
+
+    texture_load(cannon.islandTex, "res/sand2.tga");
 }
 
 static void cannon_drawBase(cannon_t& cannon)
@@ -56,7 +63,7 @@ static void cannon_drawBase(cannon_t& cannon)
 	material_bind(cannon.mat);
 
     glPushMatrix();
-    glTranslatef(0.0f, -1.0f, 0.0f);
+    glTranslatef(0.0f, 0.2f, 0.0f);
 
     glBegin(GL_TRIANGLE_STRIP);
     for(int i = 0; i <= cannon.slices; i++)
@@ -100,7 +107,7 @@ static void cannon_drawBase(cannon_t& cannon)
 	glPushMatrix();
 	glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
 	glRotatef(cannon.yaw, 1.0f, 0.0f, 0.0f);
-	glTranslatef(0.0f, -0.5, 0.0f);
+	glTranslatef(1.2f, -0.5, 0.0f);
 
     glBegin(GL_TRIANGLE_STRIP);
     for(int i = 0; i <= cannon.slices; i++)
@@ -148,16 +155,17 @@ void cannon_draw(cannon_t& cannon)
 	float theta;
 	float r;
 
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_TEXTURE_2D);
 	cannon_drawBase(cannon);
 
 	material_bind(cannon.mat);
 	
 	glPushMatrix();
+    glTranslatef(0.0f, 1.4f, 0.0f);
 	glRotatef(cannon.yaw, 0.0f, 1.0f, 0.0f);
 	glRotatef(cannon.pitch, 1.0f, 0.0f, 0.0f);
 	glBegin(GL_TRIANGLE_STRIP);
-
-	printf("%f\n", cannon.pitch);	
 
 	for(int i = 0; i <= cannon.slices; i++)
 	{
@@ -197,6 +205,19 @@ void cannon_draw(cannon_t& cannon)
 
 	
 	glPopMatrix();
+
+    glPopAttrib();
+    // Now draw the island (this'll draw over the cylinders)
+    texture_bind(cannon.islandTex);
+    material_bind(cannon.islandMat);
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.6f, 0.0f);
+    glutSolidSphere(cannon.islandRad, 40, 40);
+    glPopMatrix();
+
+    texture_unbind();
+
 }
 
 void cannon_pitch(cannon_t& cannon, float diff)

@@ -27,7 +27,7 @@ typedef struct
 
     float pitch;
     float yaw;
-
+    
     CAMERA_MODES mode;
 } camera_t;
 
