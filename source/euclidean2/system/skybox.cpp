@@ -30,8 +30,8 @@ void skybox_init()
 // Oh my fucking god, what the fuck is this...
 void skybox_draw()
 {
+    glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
 
     glColor3f(1.0f, 1.0f, 1.0f); // Don't let a glColor** call interfere with our textures!
 
@@ -100,6 +100,6 @@ void skybox_draw()
     glEnd(); 
 
     glEnable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
+    glPopAttrib();
 }
 

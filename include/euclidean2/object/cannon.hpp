@@ -27,7 +27,17 @@ struct cannon_t
 	float 		height;			/**< Cannon Width */
 	float		radius; 
 
+	float 		islandRad;
+	float		power;
+
+	float 		cooldown = 0.0f;
+
 	material_t	mat;
+	material_t	islandMat;
+
+	texture_t	islandTex;
+
+	int 		hp = 100;
 };
 
 /**

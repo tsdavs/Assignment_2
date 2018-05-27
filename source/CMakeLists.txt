@@ -32,6 +32,7 @@ add_executable("${CMAKE_PROJECT_NAME}"
     "euclidean2/object/water.cpp"
 	"euclidean2/object/boat.cpp"
 	"euclidean2/object/cannon.cpp"
+	"euclidean2/object/projectile.cpp"
 )
 
 target_link_libraries("${CMAKE_PROJECT_NAME}"

@@ -55,21 +55,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 	list(APPEND CXX_FLAGS
-		"-pedantic"
 		"-Wall"
-		"-Wextra"
-		"-Wsign-compare"
 		"-Wold-style-cast"
 		"-Wdeprecated"
-		"-Wsign-conversion"
-		"-Wconversion"
 		"-Wnon-virtual-dtor"
 		"-Wundef"
 		"-Wfloat-equal"
 		"-Wunreachable-code"
 		"-Wswitch-enum"
-		"-Weffc++"
-	)
+	    "-Wno-conversion"
+        "-Wno-float-conversion"
+        "-Wno-effc++"
+   )
 	string(REPLACE ";" " " CXX_FLAGS "${CXX_FLAGS}")
 	set(CXX_FLAGS "${CXX_FLAGS}" CACHE INTERNAL "Additional compiler flags to use.")
 	

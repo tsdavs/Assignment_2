@@ -14,6 +14,7 @@
 #include "euclidean2/object/water.hpp"
 #include "euclidean2/system/skybox.hpp"
 #include "euclidean2/object/cannon.hpp"
+#include "euclidean2/object/projectile.hpp"
 
 #include "gl_helper.hpp"
 
@@ -75,13 +76,23 @@ static void i_keyPressed(unsigned char c, int x, int y)
 
     switch(c)
     {
-
+        /**
         case 'w':
             cam_translate(cam, 0.6f * engine.dt);
             break;
 
         case 's':
             cam_translate(cam, -0.6f * engine.dt);
+            break;
+        */
+
+        case 'w':
+            cannon.power += 1.0f;
+            break;
+
+        case 's':
+            if(cannon.power > 1.0f)
+                cannon.power -= 1.0f;
             break;
             
         case 'n':
@@ -99,6 +110,45 @@ static void i_keyPressed(unsigned char c, int x, int y)
                 engine.polygonMode = GL_FILL;
 
             glPolygonMode(GL_FRONT_AND_BACK, engine.polygonMode);
+            break;
+
+        case 'l':
+            engine.lighting = !engine.lighting;
+            break;
+
+        case 'c':
+            if(cam.mode == CAMERA_MODES::CAM_LOCKED)
+                cam.mode = CAMERA_MODES::CAM_DEBUG;
+            else if(cam.mode == CAMERA_MODES::CAM_DEBUG)
+                cam.mode = CAMERA_MODES::CAM_LOCKED;
+            break;
+
+        case 't':
+            engine.textures = !engine.textures;
+            break;
+
+        case ' ':
+            vec3_t pos;
+            pos.x = SIN_D(cannon.pitch) * SIN_D(cannon.yaw);
+            pos.y = COS_D(cannon.pitch);
+            pos.z = SIN_D(cannon.pitch) * COS_D(cannon.yaw);
+            if(cannon.cooldown <= 0.0f)
+            {
+                projectile_create(pos.x, pos.y + 1.4f, pos.z, cannon.pitch, cannon.yaw, cannon.power);
+                cannon.cooldown = 3.0f;
+            }
+            break;
+
+
+        // If you're not using a keyboard with a numpad, I have some bad news for you....
+        case '8':
+            if(cam.mode == CAMERA_MODES::CAM_DEBUG)
+                cam_translate(cam, 0.6f * engine.dt);
+            break;
+
+        case '2':
+            if(cam.mode == CAMERA_MODES::CAM_DEBUG)
+                cam_translate(cam, -0.6f * engine.dt);
             break;
 
         case '+':
@@ -137,6 +187,7 @@ static void i_mouseMotion(int x, int y)
 }
 
 // Draw 3D axes
+#if 0
 static void r_drawAxes(void)
 {
 	glDisable(GL_LIGHTING);
@@ -161,6 +212,7 @@ static void r_drawAxes(void)
     glEnd();
 	glEnable(GL_LIGHTING);
 }
+#endif
 
 static void e_pumpGLError(void)
 {
@@ -214,29 +266,58 @@ static void draw(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/**
-	glDisable(GL_DEPTH_TEST);
-	glPushMatrix();
-	glLoadIdentity();
-	glRotatef(sinf(cam.lx * (180/M_PI)), 1.0f, 0.0f, 0.0f);
-	glRotatef(sinf(cam.ly * (180/M_PI)), 0.0f, 1.0f, 0.0f);
-	glRotatef(sinf(cam.lz * (180/M_PI)), 0.0f, 0.0f, 1.0f);
-	skybox_draw();
-	glPopMatrix();
-	glEnable(GL_DEPTH_TEST);
-	**/
-
-
     // View stuff
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(cam.x, cam.y, cam.z, cam.x + cam.lx, cam.y + cam.ly, cam.z + cam.lz, 0.0f, 1.0f, 0.0f);
+
+    if(cam.mode == CAMERA_MODES::CAM_DEBUG)
+    {
+        gluLookAt(cam.x, cam.y, cam.z, cam.x + cam.lx, cam.y + cam.ly, cam.z + cam.lz, 0.0f, 1.0f, 0.0f);
+
+        /**
+         *  @James: Holy fuck I aactually got it to work...
+         *  -Jesse
+         */
+        glPushMatrix();
+        glTranslatef(cam.x, cam.y, cam.z);
+        glDisable(GL_DEPTH_TEST);
+        skybox_draw(); 
+        glEnable(GL_DEPTH_TEST);
+        glPopMatrix();
+    }
+    else if(cam.mode == CAMERA_MODES::CAM_LOCKED)
+    {
+        glTranslatef(0.5f, -1.0f, -5.0f);
+        glRotatef(cam.pitch, 1.0f, 0.0f, 0.0f);
+        glRotatef(cam.yaw, 0.0f, 1.0f, 0.0f);
+
+        glPushMatrix();
+        glTranslatef(1.0f, 1.0f, 1.0f);
+        glDisable(GL_DEPTH_TEST);
+        skybox_draw(); 
+        glEnable(GL_DEPTH_TEST);
+        glPopMatrix();
+    }
 	//gluLookAt(0.0f, -1.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
-    glEnable(GL_LIGHTING);
+
+
+    if(engine.lighting)
+        glEnable(GL_LIGHTING);
+    else
+        glDisable(GL_LIGHTING);
+
+    if(engine.textures)
+        glEnable(GL_TEXTURE_2D);
+    else
+        glDisable(GL_TEXTURE_2D);
+
     glEnable(GL_LIGHT0); 
+    glLightfv(GL_LIGHT0, GL_POSITION, sun_pos);
+    
 
 	cannon_draw(cannon);
+    projectile_draw();
 
     for(size_t i = 0; i < boats.size(); i++)
     {
@@ -254,15 +335,21 @@ static void draw(void)
 		r_drawString(0, 143, "[ LIGHTING ]");
 		sprintf(str, "activeLights = %d", light_getActiveLightCount());
 		r_drawString(0, 156, str);
+        r_drawString(0, 182, "[ OSD ]");
+        sprintf(str, "fps: %f\nft: %f\n", engine.framerate, engine.frame_interval);
+        r_drawString(0, 195, str);
     }
 
     glDisable(GL_LIGHTING);
     e_pumpGLError();
 	glutSwapBuffers();
+
+    engine.frames++;
 }
 
 void e_shutdown()
 {
+    
     printf("---- e_shutdown ----\n");
     r_freeWindow();
 }
@@ -275,7 +362,7 @@ void e_update(void)
 {    
     static float prev_t = -1.0f;
     float dt = 0.0f;
-    char * direction[4] = {"north", "south", "east", "west"};
+    std::string direction[4] = {"north", "south", "east", "west"};
 
     if(engine.running)
         t = static_cast<float>(glutGet(GLUT_ELAPSED_TIME)) / MILLISECOND_TIME; // Number of ms since glutInit() was called
@@ -299,9 +386,14 @@ void e_update(void)
 
         timer_counter += dt;
 
+        projectile_update(dt);
+
+        cannon.cooldown -= 0.1f;
+
         for(size_t i = 0; i < boats.size(); i++)
         {
-            boat_animate(boats.at(i), dt, 3);
+
+            boat_update(boats.at(i), t, dt, 3);
         }
 
         if((timer_counter > 1.0f))
@@ -310,19 +402,19 @@ void e_update(void)
 
             float pos = (static_cast<float>(rand())/(static_cast<float>(RAND_MAX)/divisor)) - 15.0f;
 
-            if(strcmp(direction[tmp], "north") == 0)
+            if(strcmp(direction[tmp].c_str(), "north") == 0)
             {
                 boat_spawn(tmp_b, pos, 0.0f, 15.0f);
             }
-            else if(strcmp(direction[tmp], "south") == 0)
+            else if(strcmp(direction[tmp].c_str(), "south") == 0)
             {
                 boat_spawn(tmp_b, pos, 0.0f, -15.0f);
             }
-            else if(strcmp(direction[tmp], "east") == 0)
+            else if(strcmp(direction[tmp].c_str(), "east") == 0)
             {
                 boat_spawn(tmp_b, 15.0f, 0.0f, pos);
             }
-            else if(strcmp(direction[tmp], "west") == 0)
+            else if(strcmp(direction[tmp].c_str(), "west") == 0)
             {
                 boat_spawn(tmp_b, -15.0f, 0.0f, pos);
             }
@@ -343,11 +435,15 @@ void e_update(void)
         dt = t - engine.last_frametime;
         if(dt > 0.2)
         {           
-            engine.framerate = static_cast<float>(engine.frames)/dt;
+            engine.framerate = engine.frames/dt;
             engine.dt = dt;
             engine.last_frametime = t;
             engine.frames = 0;
         }
+    }
+    else
+    {
+        prev_t = t;
     }
     glutPostRedisplay();
 }
@@ -402,6 +498,8 @@ void e_init(int argc, char** argv)
     engine.time_elapsed     = 0.0f;
 	engine.framerate 		= 0.0f;
     engine.running          = true;
+    engine.lighting         = true;
+    engine.textures         = true;
 
     cam_init(cam, hwnd->width, hwnd->height);
 
